@@ -59,11 +59,11 @@ def gen_row(dims=128):
     return [random.uniform(0.0, 1.0) for _ in range(dims)]
 
 
-def fill_data(conn):
+def fill_data(conn, total=100000):
     with conn.cursor() as cur:
-        rows = [gen_row() for _ in range(1000)]
+        rows = [gen_row() for _ in range(total)]
         for i, row in enumerate(rows):
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 print('inserted', i, 'rows')
             cur.execute('insert into image_data (data_arr) values (%s)', (row,))
 
@@ -86,7 +86,7 @@ def run_queries(conn, n=10):
             gens.append(gen)
 
             a = time.time()
-            cur.callproc('knn', (gen, 10))
+            cur.callproc('knn', (gen, 100))
             results.append([r for r in cur])
             t = time.time() - a
 
@@ -107,8 +107,8 @@ def main():
     }
     conn_str = ' '.join(["{k}='{v}'".format(k=k, v=v) for k, v in conn_opts.items()])
     with psycopg2.connect(conn_str) as conn:
-        ensure_tables(conn)
-        fill_data(conn)
+        # ensure_tables(conn)
+        # fill_data(conn)
         run_queries(conn)
 
 
